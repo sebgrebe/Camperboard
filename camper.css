@@ -1,0 +1,51 @@
+
+.column_header {
+	@extend .col-xs-3;
+	font-weight: bold;
+}
+
+footer {
+	text-align: center;
+}
+
+h1 {
+	color: green;
+	text-align: center;
+}
+
+.logo {
+	width: 50px;
+}
+
+table {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+	border-collapse: separate;
+	border-spacing: 20px 0;
+}
+
+@media (min-width: 768px) {
+	table {
+		font-size: 150%;
+	}
+}
+
+@media (max-width: 767px) {
+	table {
+		font-size: 100%;
+	}
+}
+
+.th_points {
+	cursor: pointer;
+}
+
+.th_points:hover { 
+   background-color: #d9d9d9;
+}
+
+.userimage {
+	width: 50px;
+
+}
