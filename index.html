@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Camper Leaderboard</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+	<!-- React-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.3.1/react-dom.min.js"></script>
+
+	<!-- Bootstrap-->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<!-- CSS Stylesheet-->
+	<link rel="stylesheet" href="camper.css" type="text/css">
+
+	<!--Babel compiler-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.24/browser.js"></script>
+	
+</head>
+
+<body>
+	<div id="app"></div>
+	<script type="text/babel">
+	class FetchData extends React.Component {
+		constructor(props) {
+			super(props);
+			this.state = {
+				users_disp: [],
+				users_all: [],
+				users_recent: [],
+			};
+			this.OrderAll = this.OrderAll.bind(this);
+			this.OrderRecent = this.OrderRecent.bind(this);
+		}
+		componentDidMount(){
+		//turns json into array of arrays, deletes 'last time updated' elements, adds position, swaps index of username and img, and embedds img link into html code// 
+		function sorted(json) {
+			var sorted_arr = [];
+			for (var i=0; i < json.length; i++) {
+				var user_obj = json[i];
+				var user_array = [];
+				Object.keys(user_obj).map((elem) => user_array.push(user_obj[elem]));
+				var img = user_array[1];
+				user_array.unshift(i+1);
+				user_array[2] = user_array[1];
+				user_array[1] = <img className="userimage" src={img} />;
+				sorted_arr.push(user_array.slice(0,user_array.length-1));
+			};
+			return sorted_arr;
+		};
+		//fetches top 100 campers for the last 30 days
+		$.ajax({
+			url: 'https://fcctop100.herokuapp.com/api/fccusers/top/recent',
+			success: (data) => {
+				var users_recent = sorted(data);
+				this.setState({
+					users_disp: users_recent,
+					users_recent: users_recent,
+				})	
+			},
+			error: (XMLHttpRequest, textStatus, errorThrown) => { 
+                    alert("Status: " + textStatus); alert("Error: " + errorThrown);
+                }
+		});
+		//fetches top 100 campers of all time
+		$.ajax({
+			url: 'https://fcctop100.herokuapp.com/api/fccusers/top/alltime',
+			success: (data) => {
+				var users_all = sorted(data);
+				this.setState({
+					users_all: users_all,
+				})	
+			},
+			error: (XMLHttpRequest, textStatus, errorThrown) => { 
+                    alert("Status: " + textStatus); alert("Error: " + errorThrown);
+                }
+		});
+	}
+	//Puts campers in the all time order
+	OrderAll() {
+		this.setState({
+			users_disp: this.state.users_all, 
+		});	
+	}
+	//Puts campers in the last 30 days order
+	OrderRecent() {
+		this.setState({
+			users_disp: this.state.users_recent, 
+		})
+	}
+	render() {
+		return (
+			<div className="container-fluid">
+			<h1><img className="logo" src="fcc_logo.png" />Camper Leaderboard</h1>
+			<table className="table-striped">
+			<thead>
+			<tr>
+			<th>No.</th>	
+			<th></th>
+			<th>Username</th>
+			<th onClick={this.OrderAll} style={(this.state.users_disp === this.state.users_all) ? {color: "green"} : {color: "black"}} className="th_points">All time points</th>
+			<th onClick={this.OrderRecent} style={(this.state.users_disp === this.state.users_recent) ? {color: "green"} : {color: "black"}} className="th_points">Points last 30 days</th>
+			</tr>
+			</thead>
+			<tbody>
+			{this.state.users_disp.map((user) =>
+				<tr>{user.map((elem) => 
+					<td>{elem}</td>
+					)}
+				</tr>
+				)}	
+			</tbody>
+			</table>
+			<footer>Created by <a href="https://sebgrebe.github.io/">sebgrebe</a> with <a href="https://facebook.github.io/react/"><img src="reactlogo.png" height="28px" /></a></footer>
+			</div>
+			);
+	}
+}
+
+//renders FetchData
+ReactDOM.render(<FetchData />, document.getElementById('app'));
+</script>
+
+</body>
+</html>
